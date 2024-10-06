@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/favicon.svg" type="image/x-icon">
+    <style>
+        body,
+        html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 50%;
+        }
+
+        .row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+
+        .circle {
+            display: flex;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #f9d877;
+            position: relative;
+            margin-right: 15px;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 20px;
+            color: black;
+
+            /* &::after {
+                content: "";
+                position: absolute;
+                right: -30%;
+                top: calc(50%);
+                transform: translateX(-50%);
+                width: 0;
+                height: 5px;
+                background-color: black;
+                width: 20%;
+            } */
+        }
+
+        .circle:last-child::after {
+            content: none;
+        }
+
+        .row .circle:nth-child(odd) {
+            background-color: #eeb2bf;
+        }
+
+        .row .circle:nth-child(even) {
+            background-color: #5aaff062;
+        }
+
+        .line {
+            position: absolute;
+            left: 50%;
+            top: calc(100% + 5px);
+            transform: translateX(-50%);
+            width: 0;
+            height: 1px;
+            background-color: black;
+        }
+
+        .highlight {
+            background-color: #f6d572 !important;
+        }
+
+        .position-mark {
+            display: flex;
+            width: 80px;
+            height: 80px;
+            position: relative;
+            margin-right: 15px;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 30px;
+            color: black;
+        }
+
+        .input-container {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .input-container input[type="text"] {
+            width: 1000px;
+            padding: 5px;
+            font-size: 20px;
+        }
+
+        .input-container button {
+            padding: 5px 10px;
+            width: 100px;
+        }
+
+        .instructions {
+            margin-top: 5px;
+            color: #666;
+            font-size: 15px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            //console.log("initial museover funtion...")
+            const circles = document.querySelectorAll('.circle');
+
+            circles.forEach(circle => {
+                const textContent = circle.textContent.trim().replace(/\//g, '');
+                circle.id = textContent;
+
+                circle.addEventListener('mouseover', function () {
+                    highlightSameLetter(circles, this.textContent);
+                    //playAudioForCircle(this.textContent);
+                });
+
+                circle.addEventListener('mouseout', function () {
+                    unhighlightAll(circles);
+                });
+
+                circle.addEventListener('click', function () {
+                    playAudioForCircle(this.textContent);
+                });
+            });
+
+            document.getElementById('parseButton').addEventListener('click', function () {
+                const inputText = document.getElementById('noteInput').value;
+                parseAndPlay(inputText);
+            });
+
+
+            let currentNoteIndex = 0;
+            const noteQueue = [];
+            function parseAndPlay(inputText) {
+                noteQueue.length = 0;
+                currentNoteIndex = 0;
+                const notesArray = inputText.split(' ');
+                notesArray.forEach(note => {
+                    noteQueue.push(note.trim());
+                });
+                if (noteQueue.length > 0) {
+                    playAudioForCircle(noteQueue[currentNoteIndex]);
+                }
+            }
+
+            function playNextNote(noteElement) {
+                currentNoteIndex++;
+                if (currentNoteIndex < noteQueue.length) {
+                    setTimeout(() => {
+                        playAudioForCircle(noteQueue[currentNoteIndex]);
+                    }, 800);
+                    setTimeout(() => {
+                        noteElement.classList.remove('highlight');
+                    }, 300);
+                }
+            }
+
+            function highlightSameLetter(circles, letter) {
+                // console.log("add highlight class...")
+                circles.forEach(circle => {
+                    //console.log("log the selected cricle's text",circle.textContent)
+                    if (circle.textContent.replace(/\//g, '') === letter.replace(/\//g, '')) {
+                        circle.classList.add('highlight');
+                    }
+                });
+            }
+
+            function unhighlightAll(circles) {
+                circles.forEach(circle => {
+                    circle.classList.remove('highlight');
+                });
+            }
+            
+
+            function playAudioForCircle(noteName) {
+                let labelNoteName = noteName.replace(/\//g, '').replace(/#/g, 'sharp').replace(/b/g, 'flat');
+                // console.log("play note name ", labelNoteName)
+
+                // hight element by id
+                const noteElement = document.getElementById(noteName.replace(/\//g, ''));
+                if (noteElement) {
+                    noteElement.classList.add('highlight');
+                }
+
+                const audioSrc = `audio/${labelNoteName}.mp3`;
+                const audio = new Audio(audioSrc);
+                audio.play().catch(error => {
+                    console.error(`Failed to play audio for ${labelNoteName}:`, error);
+                }).finally(() => {
+                    playNextNote(noteElement);
+                });
+            }
+        });
+    </script>
+
+
+    <div class="container">
+        <h1>Pocket Cello</h1>
+        <p>create by zhaojiew</p>
+        <div>
+            <p id="instructions" class="instructions">说明：鼠标移动到指定音符会高亮/点击播放，按要求输入音符后可以连续播放盒高亮</p>
+        </div>
+        <div class="input-container">
+            <input type="text" id="noteInput" placeholder="input the node split by space, for example A3 B3 C4"
+                value="A3 D4 F4 E4 D4 F4 D4 E4 D4 #A3/bB3 C4 A3">
+            <button id="parseButton">PLAY</button>
+        </div>
+        <div class="row">
+            <div class="position-mark">0</div>
+            <div class="position-mark"></div>
+            <div class="position-mark">I</div>
+            <div class="position-mark"></div>
+            <div class="position-mark">II</div>
+            <div class="position-mark">III</div>
+            <div class="position-mark"></div>
+            <div class="position-mark">IV</div>
+            <div class="position-mark">V</div>
+            <div class="position-mark"></div>
+            <div class="position-mark">VI</div>
+            <div class="position-mark"></div>
+            <div class="position-mark"></div>
+        </div>
+
+        <div class="row">
+
+            <div class="circle">A3</div>
+            <div class="circle">#A3/bB3</div>
+            <div class="circle">B3</div>
+            <div class="circle">C4</div>
+            <div class="circle">#C4/bD4</div>
+            <div class="circle">D4</div>
+            <div class="circle">#D4/bE4</div>
+            <div class="circle">E4</div>
+            <div class="circle">F4</div>
+            <div class="circle">#F4/bG4</div>
+            <div class="circle">G4</div>
+            <div class="circle">#G4/bA4</div>
+            <div class="circle">A4</div>
+        </div>
+
+        <div class="row">
+            <div class="circle">D3</div>
+            <div class="circle">#D3/bE3</div>
+            <div class="circle">E3</div>
+            <div class="circle">F3</div>
+            <div class="circle">#F3/bG3</div>
+            <div class="circle">G3</div>
+            <div class="circle">#G3/bA3</div>
+            <div class="circle">A3</div>
+            <div class="circle">#A3/bB3</div>
+            <div class="circle">B3</div>
+            <div class="circle">C4</div>
+            <div class="circle">#C4/bD4</div>
+            <div class="circle">D4</div>
+        </div>
+
+        <div class="row">
+            <div class="circle">G2</div>
+            <div class="circle">#G2/bA2</div>
+            <div class="circle">A2</div>
+            <div class="circle">#A2/bB2</div>
+            <div class="circle">B2</div>
+            <div class="circle">C3</div>
+            <div class="circle">#C3/bD3</div>
+            <div class="circle">D3</div>
+            <div class="circle">#D3/bE3</div>
+            <div class="circle">E3</div>
+            <div class="circle">F3</div>
+            <div class="circle">#F3/bG3</div>
+            <div class="circle">G3</div>
+        </div>
+
+        <div class="row">
+            <div class="circle">C2</div>
+            <div class="circle">#C2/bD2</div>
+            <div class="circle">D2</div>
+            <div class="circle">#D2/bE2</div>
+            <div class="circle">E2</div>
+            <div class="circle">F2</div>
+            <div class="circle">#F2/bG2</div>
+            <div class="circle">G2</div>
+            <div class="circle">#G2/bA2</div>
+            <div class="circle">A2</div>
+            <div class="circle">#A2/bB2</div>
+            <div class="circle">B2</div>
+            <div class="circle">C3</div>
+        </div>
+    </div>
+
+</body>
+
+</html>
