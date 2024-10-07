@@ -13,3 +13,5 @@ Pocket Cello is a simple web application that allows users to preview musical no
 ## Example Input
 
 Sample sequence of notes: `A3 D4 F4 E4 D4 F4 D4 E4 D4 #A3/bB3 C4 A3`
+
+<img src="https://s2.loli.net/2024/10/07/IG8zAOhdnrl7FSH.png" alt="image.png" style="zoom: 50%;" />
