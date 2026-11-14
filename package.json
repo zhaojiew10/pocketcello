@@ -1,0 +1,10 @@
+{
+  "name": "pocketcello",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A responsive, accessible cello fingerboard and melody player.",
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  }
+}

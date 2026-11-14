@@ -1,19 +1,77 @@
-# [Pocket Cello](https://zhaojiew10.github.io/pocketcello/)
+# Pocket Cello
 
-online website: https://zhaojiew10.github.io/pocketcello/
+一个可直接部署的大提琴四弦指板与旋律播放器。保留原项目的全部真实音频采样，重新设计了界面、播放引擎和代码结构。
 
-## Description
+在线地址：<https://zhaojiew10.github.io/pocketcello/>
 
-Pocket Cello is a simple web application that allows users to preview musical notes by hovering over them and play them by clicking. Additionally, users can enter a sequence of notes, and the application will play these notes in order while highlighting the currently playing note.
+## 功能
 
-## Usage Instructions
+- **四弦指板**：C、G、D、A 四根琴弦，每弦展示空弦到第 12 品。
+- **音符试听**：点击音符播放真实采样，悬停或聚焦时高亮不同琴弦上的同音。
+- **旋律播放**：按顺序播放输入的音符，同步高亮指板和序列进度。
+- **播放控制**：支持 40–200 BPM、音量调节、停止、重新播放、循环和休止符。
+- **输入校验**：提示无效音符和超出 C2–A4 音域的输入。
+- **示例旋律**：内置音阶、小星星和欢乐颂。
+- **响应式与无障碍**：适配移动端，支持键盘焦点、屏幕阅读器标签和减少动态效果偏好。
 
-1. **Note Preview**: When you hover over any note, all identical notes will be highlighted.
-2. **Playing Notes**: Click on any note to play its corresponding audio file.
-3. **Sequential Play**: Enter a sequence of notes in the input field (notes separated by spaces), then click the "PLAY" button. The application will play these notes in the entered order.
+## 本地运行
 
-## Example Input
+项目没有构建步骤，也没有运行时 npm 依赖。由于浏览器对 ES Modules 和音频加载的安全限制，请通过 HTTP 服务访问，不要直接双击 `index.html`。
 
-Sample sequence of notes: `A3 D4 F4 E4 D4 F4 D4 E4 D4 #A3/bB3 C4 A3`
+```bash
+python -m http.server 8001
+```
 
-<img src="https://s2.loli.net/2024/10/07/IG8zAOhdnrl7FSH.png" alt="image.png" style="zoom: 50%;" />
+打开 <http://127.0.0.1:8001>。
+
+## 音符输入
+
+用空格、换行、中英文逗号或分号分隔音符：
+
+```text
+C3 D3 E3 F3 G3 A3 B3 C4
+C3, D3，E3；F3
+```
+
+支持自然音、升降音、异名同音，以及原项目的前置升降号格式：
+
+```text
+C3 C#3 Db3 #C3/bD3 D3
+A3 #A3/bB3 B3 C4
+```
+
+`-`、`_`、`r`、`rest` 或 `休止` 表示休止一拍。可用音域为 **C2–A4**。
+
+快捷键：
+
+- `Space`：在页面空白处播放、重新播放或停止旋律。
+- `Esc`：停止播放。
+- `Tab` + `Enter` / `Space`：选择并播放指板上的音符。
+
+## 自动化测试
+
+安装 Node.js 18 或更高版本后运行，无需安装第三方依赖：
+
+```bash
+npm test
+```
+
+测试覆盖音域、四弦音符映射、全部 34 个音频文件、异名同音解析、旧输入格式、休止符和错误输入。
+
+## 项目结构
+
+```text
+index.html          页面结构
+styles.css          响应式界面样式
+app.js              指板渲染、交互与播放控制
+audio.js            Web Audio 音频加载、缓存和播放
+notes.js            音符模型、音域与旋律解析
+tests/              无第三方依赖的 Node.js 测试
+audio/              原始大提琴 MP3 采样
+favicon.svg         网站图标
+.github/workflows/  GitHub Pages 自动部署
+```
+
+## 部署
+
+仓库的 GitHub Actions 工作流会在推送到 `main` 分支后发布整个静态目录。无需执行构建命令。
